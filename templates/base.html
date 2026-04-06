@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Priority Care{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+  {% if session.get('user_id') %}
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="nav-logo">🏥</span>
+      <span class="nav-title">Priority Care</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('dashboard') }}"      {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
+      <li><a href="{{ url_for('patients.patient_list') }}" {% if 'patients' in request.endpoint %}class="active"{% endif %}>Patients</a></li>
+      <li><a href="{{ url_for('analytics.analytics_page') }}" {% if 'analytics' in request.endpoint %}class="active"{% endif %}>Analytics</a></li>
+      <li><a href="{{ url_for('help_page') }}"      {% if request.endpoint == 'help_page' %}class="active"{% endif %}>Help</a></li>
+    </ul>
+    <div class="nav-user">
+      <span>{{ session.get('user_name', '') }}</span>
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm">Logout</a>
+    </div>
+  </nav>
+  {% endif %}
+
+  {# Flash messages #}
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="flash-messages">
+        {% for msg in messages %}
+          <div class="flash flash-error">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
