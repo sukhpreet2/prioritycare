@@ -130,8 +130,25 @@ def create_app(env: str = "default") -> Flask:
 
     with app.app_context():
         db.create_all()
+        _auto_seed(app)
 
     return app
+
+
+def _auto_seed(app: Flask) -> None:
+    """Seed the database on first startup if no users exist."""
+    import random
+    from datetime import datetime, timedelta, timezone
+    from models import Patient, TriageHistory, User
+    with app.app_context():
+        if User.query.first():
+            return
+        # Create default nurse user
+        nurse = User(email="nurse@example.com", display_name="Nurse View")
+        nurse.set_password("password123")
+        db.session.add(nurse)
+        db.session.commit()
+        print("[startup] Default user created: nurse@example.com / password123")
 
 
 # Allow running directly with `flask run` or `python app.py`
