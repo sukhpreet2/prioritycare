@@ -4,45 +4,84 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Priority Care{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f0f4f8; min-height: 100vh; }
+    .navbar { background: #1B4F8A; color: #fff; display: flex; align-items: center; padding: 0 28px; height: 56px; gap: 24px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    .nav-brand { font-size: 1.15rem; font-weight: 700; margin-right: 24px; white-space: nowrap; }
+    .nav-links { display: flex; gap: 4px; flex: 1; }
+    .nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; padding: 6px 14px; border-radius: 6px; font-size: 0.92rem; transition: background 0.15s; }
+    .nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,0.18); color: #fff; }
+    .nav-user { display: flex; align-items: center; gap: 12px; margin-left: auto; font-size: 0.88rem; }
+    .btn-logout { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 5px 14px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+    .btn-logout:hover { background: rgba(255,255,255,0.28); }
+    .main-content { max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
+    .flash-messages { max-width: 1200px; margin: 12px auto 0; padding: 0 20px; }
+    .flash { padding: 10px 16px; border-radius: 7px; font-size: 0.92rem; margin-bottom: 8px; }
+    .flash-error { background: #fdecea; color: #c0392b; border: 1px solid #f5c6cb; }
+    .card { background: #fff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); padding: 24px; margin-bottom: 20px; }
+    .card-title { font-size: 1.1rem; font-weight: 700; color: #1B4F8A; margin-bottom: 16px; }
+    .btn { display: inline-block; padding: 9px 20px; border-radius: 7px; font-size: 0.92rem; font-weight: 600; cursor: pointer; border: none; text-decoration: none; transition: opacity 0.15s; }
+    .btn-primary { background: #1B4F8A; color: #fff; }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-danger { background: #E63946; color: #fff; }
+    .btn-danger:hover { opacity: 0.88; }
+    .btn-secondary { background: #e9ecef; color: #333; }
+    .btn-sm { padding: 5px 12px; font-size: 0.82rem; }
+    .badge { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+    .badge-red { background: #E63946; color: #fff; }
+    .badge-yellow { background: #F4A261; color: #fff; }
+    .badge-green { background: #2A9D8F; color: #fff; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th { background: #f4f7fb; color: #1B4F8A; font-weight: 700; padding: 11px 14px; text-align: left; border-bottom: 2px solid #dbe3f0; }
+    td { padding: 10px 14px; border-bottom: 1px solid #eef1f6; vertical-align: middle; }
+    tr:hover td { background: #f8fafd; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 0.88rem; font-weight: 600; color: #333; margin-bottom: 6px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 13px; border: 1.5px solid #d0d7de; border-radius: 7px; font-size: 0.95rem; outline: none; transition: border 0.2s; font-family: Arial, sans-serif; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #1B4F8A; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); padding: 20px 24px; }
+    .stat-label { font-size: 0.82rem; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 2rem; font-weight: 800; color: #1B4F8A; margin-top: 4px; }
+    .stat-card.red .stat-value { color: #E63946; }
+    .stat-card.green .stat-value { color: #2A9D8F; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .page-title { font-size: 1.5rem; font-weight: 800; color: #1B4F8A; }
+    .search-bar { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+    .search-bar input, .search-bar select { padding: 9px 13px; border: 1.5px solid #d0d7de; border-radius: 7px; font-size: 0.92rem; outline: none; }
+    @media (max-width: 640px) {
+      .form-row, .form-row-3 { grid-template-columns: 1fr; }
+      .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+    }
+  </style>
   {% block head %}{% endblock %}
 </head>
 <body>
-
-  {% if session.get('user_id') %}
-  <nav class="navbar">
-    <div class="nav-brand">
-      <span class="nav-logo">🏥</span>
-      <span class="nav-title">Priority Care</span>
+<nav class="navbar">
+  <div class="nav-brand">🏥 Priority Care</div>
+  <div class="nav-links">
+    <a href="/dashboard" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a>
+    <a href="/patients/" {% if 'patients' in (request.endpoint or '') %}class="active"{% endif %}>Patients</a>
+    <a href="/analytics/" {% if 'analytics' in (request.endpoint or '') %}class="active"{% endif %}>Analytics</a>
+    <a href="/help" {% if request.endpoint == 'help_page' %}class="active"{% endif %}>Help</a>
+  </div>
+  <div class="nav-user">
+    <span>{{ session.get('user_name', '') }}</span>
+    <a href="/logout" class="btn-logout">Logout</a>
+  </div>
+</nav>
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="flash-messages">
+      {% for msg in messages %}<div class="flash flash-error">{{ msg }}</div>{% endfor %}
     </div>
-    <ul class="nav-links">
-      <li><a href="{{ url_for('dashboard') }}"      {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
-      <li><a href="{{ url_for('patients.patient_list') }}" {% if 'patients' in request.endpoint %}class="active"{% endif %}>Patients</a></li>
-      <li><a href="{{ url_for('analytics.analytics_page') }}" {% if 'analytics' in request.endpoint %}class="active"{% endif %}>Analytics</a></li>
-      <li><a href="{{ url_for('help_page') }}"      {% if request.endpoint == 'help_page' %}class="active"{% endif %}>Help</a></li>
-    </ul>
-    <div class="nav-user">
-      <span>{{ session.get('user_name', '') }}</span>
-      <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm">Logout</a>
-    </div>
-  </nav>
   {% endif %}
-
-  {# Flash messages #}
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <div class="flash-messages">
-        {% for msg in messages %}
-          <div class="flash flash-error">{{ msg }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endwith %}
-
-  <main class="main-content">
-    {% block content %}{% endblock %}
-  </main>
-
-  {% block scripts %}{% endblock %}
+{% endwith %}
+<div class="main-content">{% block content %}{% endblock %}</div>
+{% block scripts %}{% endblock %}
 </body>
 </html>

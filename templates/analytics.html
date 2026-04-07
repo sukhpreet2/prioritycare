@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Analytics — Priority Care{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">Analytics</div>
+  <a href="/analytics/export" class="btn btn-primary">⬇ Export CSV</a>
+</div>
+
+<!-- Distribution Cards (filled by JS) -->
+<div class="stat-grid">
+  <div class="stat-card red">
+    <div class="stat-label">RED %</div>
+    <div class="stat-value" id="red-pct">—</div>
+  </div>
+  <div class="stat-card" style="">
+    <div class="stat-label">YELLOW %</div>
+    <div class="stat-value" id="yellow-pct" style="color:#F4A261;">—</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-label">GREEN %</div>
+    <div class="stat-value" id="green-pct">—</div>
+  </div>
+</div>
+
+<!-- Daily Triage Chart -->
+<div class="card">
+  <div class="card-title">Daily Triage Volume (Last 7 Days)</div>
+  <canvas id="dailyChart" height="100"></canvas>
+</div>
+
+<!-- Avg Wait Chart -->
+<div class="card">
+  <div class="card-title">Average Wait Time (Minutes)</div>
+  <canvas id="waitChart" height="80"></canvas>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadAnalytics() {
+  try {
+    const res = await fetch('/analytics/data');
+    const data = await res.json();
+
+    // Update distribution cards
+    document.getElementById('red-pct').textContent    = data.triage_dist.red_pct + '%';
+    document.getElementById('yellow-pct').textContent = data.triage_dist.yellow_pct + '%';
+    document.getElementById('green-pct').textContent  = data.triage_dist.green_pct + '%';
+
+    const labels = data.daily_counts.map(d => d.date);
+
+    // Daily triage bar chart
+    new Chart(document.getElementById('dailyChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'RED',    data: data.daily_counts.map(d => d.red),    backgroundColor: '#E63946' },
+          { label: 'YELLOW', data: data.daily_counts.map(d => d.yellow), backgroundColor: '#F4A261' },
+          { label: 'GREEN',  data: data.daily_counts.map(d => d.green),  backgroundColor: '#2A9D8F' },
+        ]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+    });
+
+    // Average wait line chart
+    new Chart(document.getElementById('waitChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Avg Wait (min)',
+          data: data.avg_wait.map(d => d.minutes),
+          borderColor: '#1B4F8A',
+          backgroundColor: 'rgba(27,79,138,0.1)',
+          tension: 0.3,
+          fill: true,
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true } } }
+    });
+
+  } catch (err) {
+    console.error('Analytics load failed:', err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadAnalytics);
+</script>
+{% endblock %}

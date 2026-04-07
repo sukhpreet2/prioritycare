@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{{ patient.full_name }} — Priority Care{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">
+    {{ patient.patient_id_display() }} — {{ patient.full_name }}
+  </div>
+  <div style="display:flex; gap:10px;">
+    <a href="/patients/{{ patient.id }}/edit" class="btn btn-secondary">Edit</a>
+    <a href="/patients/" class="btn btn-secondary">← Back</a>
+  </div>
+</div>
+
+<!-- Triage banner -->
+<div class="card" style="border-left: 5px solid
+  {% if patient.triage_label == 'RED' %}#E63946
+  {% elif patient.triage_label == 'YELLOW' %}#F4A261
+  {% else %}#2A9D8F{% endif %};">
+  <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+    <span class="badge badge-{{ patient.triage_label.lower() }}" style="font-size:1.1rem; padding:6px 20px;">
+      {{ patient.triage_label }}
+    </span>
+    <span style="color:#555;">Confidence: {{ (patient.confidence * 100)|int if patient.confidence else 0 }}%</span>
+    <span style="color:#888; font-size:0.88rem;">Arrived: {{ patient.arrival_time.strftime('%B %d, %Y at %H:%M') if patient.arrival_time else '—' }}</span>
+  </div>
+</div>
+
+<!-- Patient vitals -->
+<div class="card">
+  <div class="card-title">Vitals & Information</div>
+  <div class="form-row-3" style="gap:20px;">
+    <div><div class="stat-label">Full Name</div><div id="display-full_name" style="font-size:1rem; font-weight:600; margin-top:4px;">{{ patient.full_name }}</div></div>
+    <div><div class="stat-label">Age</div><div id="display-age" style="font-size:1rem; font-weight:600; margin-top:4px;">{{ patient.age }}</div></div>
+    <div><div class="stat-label">Pain Level</div><div id="display-pain_level" style="font-size:1rem; font-weight:600; margin-top:4px;">{{ patient.pain_level }}/10</div></div>
+    <div><div class="stat-label">Respiratory Rate</div><div id="display-resp_rate" style="font-size:1rem; font-weight:600; margin-top:4px;">{{ patient.resp_rate or '—' }} bpm</div></div>
+    <div><div class="stat-label">Heart Rate</div><div id="display-heart_rate" style="font-size:1rem; font-weight:600; margin-top:4px;">{{ patient.heart_rate or '—' }} bpm</div></div>
+    <div><div class="stat-label">Oxygen Sat</div><div id="display-oxygen_sat" style="font-size:1rem; font-weight:600; margin-top:4px;">{{ patient.oxygen_sat or '—' }}%</div></div>
+    <div><div class="stat-label">BP Systolic</div><div id="display-bp_systolic" style="font-size:1rem; font-weight:600; margin-top:4px;">{{ patient.bp_systolic or '—' }}</div></div>
+    <div><div class="stat-label">BP Diastolic</div><div id="display-bp_diastolic" style="font-size:1rem; font-weight:600; margin-top:4px;">{{ patient.bp_diastolic or '—' }}</div></div>
+  </div>
+  {% if patient.symptoms %}
+  <div style="margin-top:16px;">
+    <div class="stat-label">Symptoms</div>
+    <div id="display-symptoms" style="margin-top:4px; color:#333;">{{ patient.symptoms }}</div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Triage History -->
+<div class="card">
+  <div class="card-title">Triage History</div>
+  {% if history %}
+    {% for h in history %}
+    <div style="display:flex; gap:14px; padding:12px 0; border-bottom:1px solid #eef1f6;">
+      <div style="width:10px; height:10px; border-radius:50%; background:#1B4F8A; margin-top:5px; flex-shrink:0;"></div>
+      <div>
+        <div style="font-size:0.8rem; color:#888;">{{ h.timestamp.strftime('%b %d, %Y %H:%M') if h.timestamp else '—' }} — {{ h.performed_by or 'Staff' }}</div>
+        <div style="font-weight:600; font-size:0.92rem;">{{ h.action }}</div>
+        {% if h.result %}<div style="font-size:0.88rem; color:#555;">{{ h.result }}</div>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p style="color:#888;">No history recorded yet.</p>
+  {% endif %}
+</div>
+
+<!-- Save feedback -->
+<div id="save-success" style="display:none;" class="flash flash-success">Changes saved successfully.</div>
+<div id="save-error" style="display:none;" class="flash flash-error"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Expose patient ID for the JS save handler
+  document.addEventListener('DOMContentLoaded', () => {
+    const saveBtn = document.getElementById('save-btn');
+    if (saveBtn) saveBtn.dataset.patientId = '{{ patient.id }}';
+  });
+</script>
+<script src="/static/scripts/patient-detail.js"></script>
+{% endblock %}

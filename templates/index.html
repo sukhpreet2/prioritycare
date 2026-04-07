@@ -3,46 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}Priority Care{% endblock %}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}" />
-  {% block head %}{% endblock %}
+  <title>Priority Care — Login</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f0f4f8; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .login-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.10); padding: 48px 40px; width: 100%; max-width: 420px; }
+    .login-logo { text-align: center; margin-bottom: 8px; font-size: 2.5rem; }
+    .login-title { text-align: center; font-size: 1.6rem; font-weight: 700; color: #1B4F8A; margin-bottom: 4px; }
+    .login-sub { text-align: center; color: #666; font-size: 0.92rem; margin-bottom: 32px; }
+    label { display: block; font-size: 0.88rem; font-weight: 600; color: #333; margin-bottom: 6px; }
+    input { width: 100%; padding: 11px 14px; border: 1.5px solid #d0d7de; border-radius: 7px; font-size: 1rem; margin-bottom: 20px; outline: none; transition: border 0.2s; }
+    input:focus { border-color: #1B4F8A; }
+    .btn-login { width: 100%; padding: 13px; background: #1B4F8A; color: #fff; border: none; border-radius: 7px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+    .btn-login:hover { background: #16407a; }
+    .flash-error { background: #fdecea; color: #c0392b; border: 1px solid #f5c6cb; border-radius: 7px; padding: 10px 14px; margin-bottom: 18px; font-size: 0.92rem; }
+    .login-hint { text-align: center; margin-top: 20px; color: #888; font-size: 0.82rem; }
+  </style>
 </head>
 <body>
+  <div class="login-card">
+    <div class="login-logo">🏥</div>
+    <div class="login-title">Priority Care</div>
+    <div class="login-sub">Emergency Triage Support System</div>
 
-  {% if session.get('user_id') %}
-  <nav class="navbar">
-    <div class="nav-brand">
-      <span class="nav-logo">🏥</span>
-      <span class="nav-title">Priority Care</span>
-    </div>
-    <ul class="nav-links">
-      <li><a href="{{ url_for('dashboard') }}"      {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a></li>
-      <li><a href="{{ url_for('patients.patient_list') }}" {% if 'patients' in request.endpoint %}class="active"{% endif %}>Patients</a></li>
-      <li><a href="{{ url_for('analytics.analytics_page') }}" {% if 'analytics' in request.endpoint %}class="active"{% endif %}>Analytics</a></li>
-      <li><a href="{{ url_for('help_page') }}"      {% if request.endpoint == 'help_page' %}class="active"{% endif %}>Help</a></li>
-    </ul>
-    <div class="nav-user">
-      <span>{{ session.get('user_name', '') }}</span>
-      <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm">Logout</a>
-    </div>
-  </nav>
-  {% endif %}
-
-  {# Flash messages #}
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <div class="flash-messages">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
         {% for msg in messages %}
-          <div class="flash flash-error">{{ msg }}</div>
+          <div class="flash-error">{{ msg }}</div>
         {% endfor %}
-      </div>
-    {% endif %}
-  {% endwith %}
+      {% endif %}
+    {% endwith %}
 
-  <main class="main-content">
-    {% block content %}{% endblock %}
-  </main>
+    <form method="POST" action="/login">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" name="email" placeholder="nurse@example.com" required autofocus />
 
-  {% block scripts %}{% endblock %}
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" placeholder="••••••••" required />
+
+      <button type="submit" class="btn-login">Sign In</button>
+    </form>
+
+    <div class="login-hint">Demo: nurse@example.com / password123</div>
+  </div>
 </body>
 </html>

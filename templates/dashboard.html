@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Priority Care{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">Dashboard</div>
+  <a href="/patients/new" class="btn btn-primary">+ New Patient</a>
+</div>
+
+<!-- KPI Stats -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-label">Patients Today</div>
+    <div class="stat-value">{{ total_today }}</div>
+  </div>
+  <div class="stat-card red">
+    <div class="stat-label">Critical (RED)</div>
+    <div class="stat-value">{{ red_count }}</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-label">Avg Wait (min)</div>
+    <div class="stat-value">{{ avg_wait }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Logged In As</div>
+    <div class="stat-value" style="font-size:1rem; margin-top:8px;">{{ user_name }}</div>
+  </div>
+</div>
+
+<!-- Recent Patients -->
+<div class="card">
+  <div class="card-title">Recent Patients</div>
+  {% if recent_patients %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Age</th>
+          <th>Triage</th>
+          <th>Arrived</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in recent_patients %}
+        <tr>
+          <td>{{ p.patient_id_display() }}</td>
+          <td>{{ p.full_name }}</td>
+          <td>{{ p.age }}</td>
+          <td><span class="badge badge-{{ p.triage_label.lower() }}">{{ p.triage_label }}</span></td>
+          <td>{{ p.arrival_time.strftime('%b %d, %H:%M') if p.arrival_time else '—' }}</td>
+          <td><a href="/patients/{{ p.id }}" class="btn btn-secondary btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="color:#888; text-align:center; padding:24px;">No patients yet. <a href="/patients/new">Add the first patient →</a></p>
+  {% endif %}
+</div>
+{% endblock %}

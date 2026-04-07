@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Patients — Priority Care{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">Patient List</div>
+  <a href="/patients/new" class="btn btn-primary">+ New Patient</a>
+</div>
+
+<!-- Search & Filter -->
+<form method="GET" action="/patients/">
+  <div class="search-bar">
+    <input type="text" name="q" placeholder="Search by name…" value="{{ search_term }}" />
+    <select name="triage">
+      <option value="">All Triage Levels</option>
+      <option value="RED"    {% if triage_filter == 'RED'    %}selected{% endif %}>🔴 RED</option>
+      <option value="YELLOW" {% if triage_filter == 'YELLOW' %}selected{% endif %}>🟡 YELLOW</option>
+      <option value="GREEN"  {% if triage_filter == 'GREEN'  %}selected{% endif %}>🟢 GREEN</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Search</button>
+    <a href="/patients/" class="btn btn-secondary">Clear</a>
+  </div>
+</form>
+
+<div class="card">
+  {% if patients %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Age</th>
+          <th>Pain</th>
+          <th>Triage</th>
+          <th>Confidence</th>
+          <th>Arrived</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in patients %}
+        <tr>
+          <td>{{ p.patient_id_display() }}</td>
+          <td>{{ p.full_name }}</td>
+          <td>{{ p.age }}</td>
+          <td>{{ p.pain_level }}/10</td>
+          <td><span class="badge badge-{{ p.triage_label.lower() }}">{{ p.triage_label }}</span></td>
+          <td>{{ (p.confidence * 100)|int }}%</td>
+          <td>{{ p.arrival_time.strftime('%b %d, %H:%M') if p.arrival_time else '—' }}</td>
+          <td style="display:flex; gap:6px;">
+            <a href="/patients/{{ p.id }}" class="btn btn-secondary btn-sm">View</a>
+            <a href="/patients/{{ p.id }}/edit" class="btn btn-secondary btn-sm">Edit</a>
+            <button class="btn btn-danger btn-sm" data-delete-patient="{{ p.id }}">Delete</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p style="margin-top:12px; color:#888; font-size:0.85rem;">{{ patients|length }} patient(s) found</p>
+  {% else %}
+  <p style="color:#888; text-align:center; padding:32px;">
+    No patients found.
+    {% if search_term or triage_filter %}<a href="/patients/">Clear filters</a>{% else %}<a href="/patients/new">Add the first patient →</a>{% endif %}
+  </p>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/scripts/patients.js"></script>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}New Patient — Priority Care{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">New Patient Intake</div>
+  <a href="/patients/" class="btn btn-secondary">← Back to Patients</a>
+</div>
+
+<div class="card">
+  <div class="card-title">Patient Information</div>
+  <form method="POST" action="/patients/" id="patient-form">
+
+    <!-- Hidden triage result fields populated by JS -->
+    <input type="hidden" id="hidden-triage-label" name="triage_label" value="GREEN" />
+    <input type="hidden" id="hidden-confidence" name="confidence" value="0.80" />
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="full_name">Full Name *</label>
+        <input type="text" id="full_name" name="full_name" required placeholder="e.g. Jane Smith" />
+      </div>
+      <div class="form-group">
+        <label for="age">Age *</label>
+        <input type="number" id="age" name="age" required min="0" max="120" placeholder="e.g. 45" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="pain_level">Pain Level * (0–10)</label>
+        <input type="number" id="pain_level" name="pain_level" required min="0" max="10" placeholder="e.g. 7" />
+      </div>
+      <div class="form-group">
+        <label for="resp_rate">Respiratory Rate (breaths/min)</label>
+        <input type="number" id="resp_rate" name="resp_rate" min="0" max="60" placeholder="e.g. 18" />
+      </div>
+    </div>
+
+    <div class="form-row-3">
+      <div class="form-group">
+        <label for="heart_rate">Heart Rate (bpm)</label>
+        <input type="number" id="heart_rate" name="heart_rate" min="0" max="250" placeholder="e.g. 80" />
+      </div>
+      <div class="form-group">
+        <label for="oxygen_sat">Oxygen Saturation (%)</label>
+        <input type="number" id="oxygen_sat" name="oxygen_sat" min="50" max="100" step="0.1" placeholder="e.g. 98" />
+      </div>
+      <div class="form-group">
+        <label for="bp_systolic">BP Systolic</label>
+        <input type="number" id="bp_systolic" name="bp_systolic" min="50" max="250" placeholder="e.g. 120" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="bp_diastolic">BP Diastolic</label>
+        <input type="number" id="bp_diastolic" name="bp_diastolic" min="30" max="150" placeholder="e.g. 80" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="symptoms">Symptoms / Notes</label>
+      <textarea id="symptoms" name="symptoms" rows="3" placeholder="Describe patient symptoms…"></textarea>
+    </div>
+
+    <!-- Predict button -->
+    <button type="button" id="predict-btn" class="btn btn-primary" style="margin-bottom:16px;">
+      🔍 Predict Triage
+    </button>
+    <div id="predict-error" style="color:#c0392b; display:none; margin-bottom:12px;"></div>
+
+    <!-- Triage result panel -->
+    <div id="triage-result" class="triage-result" style="display:none;">
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <span id="triage-label" class="badge" style="font-size:1.1rem; padding:6px 18px;">—</span>
+        <span id="triage-confidence" style="color:#555; font-size:0.92rem;"></span>
+      </div>
+      <div id="triage-action" class="triage-result-action"></div>
+    </div>
+
+    <div style="margin-top:24px; display:flex; gap:12px;">
+      <button type="submit" class="btn btn-primary">💾 Save Patient</button>
+      <a href="/patients/" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/scripts/new-patient.js"></script>
+{% endblock %}
